@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="jumbotron text-center">
+    <h1>CAD Projects Hub</h1>
+    <p class="lead">Manage your CAD projects in one place</p>
+</div>
+
+<div class="container">
+    <!-- Pierwszy rząd: Główne wprowadzenie -->
+    <div class="row mb-5">
+        <div class="col-md-12 text">
+            <h2 class="mt-5">Welcome to CAD Projects Hub</h2>
+            <p>
+                CAD Projects Hub is a web-based application designed for CAD (Computer-Aided Design) professionals and hobbyists who need an effective tool for organizing and managing files related to machining and 3D printing. The application supports file formats such as .step (Standard for the Exchange of Product Model Data) and .stl (Stereolithography), allowing users to easily store, view, and categorize their designs.
+            </p>
+        </div>
+    </div>
+
+    <!-- Drugi rząd: Dwa elementy, po lewej szeroka kolumna, po prawej węższa -->
+    <div class="row">
+        <div class="col-md-8 mb-4">
+            <h2 class="mt-4">Upload and organize CAD projects</h2>
+            <p>
+                You can upload your CAD files, manage them, and categorize projects by type for easy organization and review.
+            </p>
+            <p><a class="btn btn-primary" href="/Upload/Index">Upload a new project &raquo;</a></p>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <h2 class="mt-4">Explore features</h2>
+            <p>
+                The application offers a variety of features, such as project browsing, file categorization and quick search.
+            </p>
+            <p><a class="btn btn-secondary" href="/Projects/Index">View all projects &raquo;</a></p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h2>Secure storage of projects</h2>
+                    <p>All CAD designs are securely stored in our database, ensuring reliable access and data protection.</p>
+                </div>
+            </div>
+        </div>
+    </footer>

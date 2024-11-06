@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CADProjectsHub", "CADProjectsHub\CADProjectsHub.csproj", "{81C007AD-194A-4AC1-A956-99C7B4179E22}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{81C007AD-194A-4AC1-A956-99C7B4179E22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81C007AD-194A-4AC1-A956-99C7B4179E22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81C007AD-194A-4AC1-A956-99C7B4179E22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81C007AD-194A-4AC1-A956-99C7B4179E22}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FB3B4DBE-B3CF-4D93-B3CA-B907EE69B729}
+	EndGlobalSection
+EndGlobal

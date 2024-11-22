@@ -76,10 +76,10 @@ namespace CADProjectsHub.Data
                 new Assignment { ProjectID = 2, CADModelID = 13 },
                 new Assignment { ProjectID = 2, CADModelID = 14 },
                 new Assignment { ProjectID = 2, CADModelID = 15 },
-                new Assignment { ProjectID = 2, CADModelID = 16 },
-                new Assignment { ProjectID = 2, CADModelID = 17 },
-                new Assignment { ProjectID = 2, CADModelID = 18 },
-                new Assignment { ProjectID = 2, CADModelID = 19 },
+                new Assignment { ProjectID = 3, CADModelID = 16 },
+                new Assignment { ProjectID = 3, CADModelID = 17 },
+                new Assignment { ProjectID = 3, CADModelID = 18 },
+                new Assignment { ProjectID = 3, CADModelID = 19 },
 
             };
 

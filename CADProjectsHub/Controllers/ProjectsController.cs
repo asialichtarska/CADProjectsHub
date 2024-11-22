@@ -34,6 +34,9 @@ namespace CADProjectsHub.Controllers
             }
 
             var project = await _context.Projects
+                .Include(s => s.Assignments)
+                    .ThenInclude(a => a.CADModel)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ProjectID == id);
             if (project == null)
             {
@@ -56,11 +59,21 @@ namespace CADProjectsHub.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProjectID,Name,Description,ProjectManager")] Project project)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(project);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(project);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateException /* ex */)
+            {
+                //Log the error (uncomment ex variable name and write a log.
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
             }
             return View(project);
         }

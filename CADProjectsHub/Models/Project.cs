@@ -7,10 +7,10 @@ namespace CADProjectsHub.Models
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int ProjectID { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string ProjectManager { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public string? ProjectManager { get; set; }
 
-        public ICollection<Assignment> Assignments { get; set; }
+        public ICollection<Assignment>? Assignments { get; set; }
     }
 }

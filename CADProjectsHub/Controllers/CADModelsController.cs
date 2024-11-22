@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CADProjectsHub.Data;
 using CADProjectsHub.Models;
+using CADProjectsHub;
 
 namespace CADProjectsHub.Controllers
 {
@@ -20,9 +21,47 @@ namespace CADProjectsHub.Controllers
         }
 
         // GET: CADModels
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
-            return View(await _context.CADModels.ToListAsync());
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var cADModels = from s in _context.CADModels
+                           select s;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                cADModels = cADModels.Where(s => s.Name.Contains(searchString)
+                                       || s.FileType.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    cADModels = cADModels.OrderByDescending(s => s.Name);
+                    break;
+                case "Date":
+                    cADModels = cADModels.OrderBy(s => s.AssignmentDate);
+                    break;
+                case "date_desc":
+                    cADModels = cADModels.OrderByDescending(s => s.AssignmentDate);
+                    break;
+                default:
+                    cADModels = cADModels.OrderBy(s => s.Name);
+                    break;
+            }
+            int pageSize = 10;
+            return View(await PaginatedList<CADModel>.CreateAsync(cADModels.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: CADModels/Details/5
@@ -34,6 +73,9 @@ namespace CADProjectsHub.Controllers
             }
 
             var cADModel = await _context.CADModels
+                .Include(s => s.Assignments)
+                    .ThenInclude(a => a.Project)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (cADModel == null)
             {
@@ -54,13 +96,22 @@ namespace CADProjectsHub.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,FileType,Manufacturing,ConstructorName,AssignmentDate")] CADModel cADModel)
+        public async Task<IActionResult> Create([Bind("Name,FileType,Manufacturing,ConstructorName,AssignmentDate")] CADModel cADModel)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(cADModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(cADModel);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "contact your system administrator.");
             }
             return View(cADModel);
         }
@@ -73,18 +124,17 @@ namespace CADProjectsHub.Controllers
                 return NotFound();
             }
 
-            var cADModel = await _context.CADModels.FindAsync(id);
-            if (cADModel == null)
+            var cADModelToUpdate = await _context.CADModels.FindAsync(id);
+            if (cADModelToUpdate == null)
             {
                 return NotFound();
             }
-            return View(cADModel);
+            return View(cADModelToUpdate);
         }
-
         // POST: CADModels/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,FileType,Manufacturing,ConstructorName,AssignmentDate")] CADModel cADModel)
         {

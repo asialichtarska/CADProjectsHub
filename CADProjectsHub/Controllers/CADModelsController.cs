@@ -8,16 +8,19 @@ using Microsoft.EntityFrameworkCore;
 using CADProjectsHub.Data;
 using CADProjectsHub.Models;
 using CADProjectsHub;
+using CADProjectsHub.Crypto;
 
 namespace CADProjectsHub.Controllers
 {
     public class CADModelsController : Controller
     {
         private readonly CADProjectsContext _context;
+        private readonly IConfiguration _configuration;
 
-        public CADModelsController(CADProjectsContext context)
+        public CADModelsController(CADProjectsContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: CADModels
@@ -82,6 +85,13 @@ namespace CADProjectsHub.Controllers
                 return NotFound();
             }
 
+            var encryptionKey = _configuration["EncryptionSettings:AESKey"];
+            if (!string.IsNullOrEmpty(cADModel.ConstructorName) && !string.IsNullOrEmpty(cADModel.IVKey))
+            {
+                cADModel.ConstructorName = DataProtection.Decrypt(cADModel.ConstructorName, encryptionKey, cADModel.IVKey);
+            }
+
+
             return View(cADModel);
         }
 
@@ -102,6 +112,15 @@ namespace CADProjectsHub.Controllers
             {
                 if (ModelState.IsValid)
                 {
+
+                    var encryptionKey = _configuration["EncryptionSettings:AESKey"];
+                    if (!string.IsNullOrEmpty(cADModel.ConstructorName)) 
+                    {
+                        string IV;
+                        cADModel.ConstructorName = DataProtection.Encrypt(cADModel.ConstructorName, encryptionKey, out IV);
+                        cADModel.IVKey = IV;
+                    }
+
                     _context.Add(cADModel);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -147,6 +166,15 @@ namespace CADProjectsHub.Controllers
             {
                 try
                 {
+
+                    var encryptionKey = _configuration["EncryptionSettings:AESKey"];
+                    if (!string.IsNullOrEmpty(cADModel.ConstructorName)) // Sprawdzenie, czy nie jest null
+                    {
+                        string IV;
+                        cADModel.ConstructorName = DataProtection.Encrypt(cADModel.ConstructorName, encryptionKey, out IV);
+                        cADModel.IVKey = IV;
+                    }
+
                     _context.Update(cADModel);
                     await _context.SaveChangesAsync();
                 }

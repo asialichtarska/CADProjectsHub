@@ -10,6 +10,7 @@ namespace CADProjectsHub.Models
         public string? FileType { get; set; }
         public string? Manufacturing { get; set; }
         public string? ConstructorName { get; set; }
+        public string? IVKey { get; set; }
         public DateTime AssignmentDate { get; set; }
 
         public ICollection<Assignment>? Assignments { get; set; }

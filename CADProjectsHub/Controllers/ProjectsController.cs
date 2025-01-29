@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CADProjectsHub.Data;
 using CADProjectsHub.Models;
+using CADProjectsHub.Crypto;
 
 namespace CADProjectsHub.Controllers
 {
     public class ProjectsController : Controller
     {
         private readonly CADProjectsContext _context;
+        private readonly IConfiguration _configuration;
 
-        public ProjectsController(CADProjectsContext context)
+        public ProjectsController(CADProjectsContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: Projects
@@ -41,6 +44,19 @@ namespace CADProjectsHub.Controllers
             if (project == null)
             {
                 return NotFound();
+            }
+
+            var encryptionKey = _configuration["EncryptionSettings:AESKey"];
+
+            foreach (var assignment in project.Assignments)
+            {
+                if (assignment.CADModel != null &&
+                    !string.IsNullOrEmpty(assignment.CADModel.ConstructorName) &&
+                    !string.IsNullOrEmpty(assignment.CADModel.IVKey))
+                {
+                    assignment.CADModel.ConstructorName = DataProtection.Decrypt(
+                        assignment.CADModel.ConstructorName, encryptionKey, assignment.CADModel.IVKey);
+                }
             }
 
             return View(project);

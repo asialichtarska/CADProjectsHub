@@ -1,0 +1,67 @@
+﻿@model CADProjectsHub.Models.Project
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Project</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ProjectManager)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ProjectManager)
+        </dd>
+
+        <!-- Dodanie sekcji do wyświetlania przypisanych modeli CAD -->
+        @if (Model.Assignments != null && Model.Assignments.Any())
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Assignments)
+            </dt>
+            <dd class="col-sm-10">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Model Name</th>
+                            <th>File Type</th>
+                            <th>Constructor Name</th>
+                            <th>Assignment Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var assignment in Model.Assignments)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => assignment.CADModel.Name)</td>
+                                <td>@Html.DisplayFor(modelItem => assignment.CADModel.FileType)</td>
+                                <td>@Html.DisplayFor(modelItem => assignment.CADModel.ConstructorName)</td>
+                                <td>@Html.DisplayFor(modelItem => assignment.CADModel.AssignmentDate)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </dd>
+        }
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.ProjectID">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

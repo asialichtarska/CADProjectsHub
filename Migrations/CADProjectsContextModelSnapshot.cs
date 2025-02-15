@@ -45,6 +45,39 @@ namespace CADProjectsHub.Migrations
                     b.ToTable("Assignment", (string)null);
                 });
 
+            modelBuilder.Entity("CADProjectsHub.Models.CADFile", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("CADModelID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CADModelID");
+
+                    b.ToTable("CADFile", (string)null);
+                });
+
             modelBuilder.Entity("CADProjectsHub.Models.CADModel", b =>
                 {
                     b.Property<int>("ID")
@@ -56,13 +89,13 @@ namespace CADProjectsHub.Migrations
                     b.Property<DateTime>("AssignmentDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ConstructorInitializationVector")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConstructorName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FileType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IVKey")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Manufacturing")
@@ -112,6 +145,17 @@ namespace CADProjectsHub.Migrations
                     b.Navigation("CADModel");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("CADProjectsHub.Models.CADFile", b =>
+                {
+                    b.HasOne("CADProjectsHub.Models.CADModel", "CADModel")
+                        .WithMany()
+                        .HasForeignKey("CADModelID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CADModel");
                 });
 
             modelBuilder.Entity("CADProjectsHub.Models.CADModel", b =>

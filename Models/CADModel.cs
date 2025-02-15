@@ -1,5 +1,7 @@
-﻿using System;
+﻿using CADProjectsHub.Crypto;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CADProjectsHub.Models
 {
@@ -10,8 +12,12 @@ namespace CADProjectsHub.Models
         public string? FileType { get; set; }
         public string? Manufacturing { get; set; }
         public string? ConstructorName { get; set; }
-        public string? IVKey { get; set; }
+        public string? ConstructorInitializationVector { get; set; }
         public DateTime AssignmentDate { get; set; }
+
+
+        [NotMapped]
+        public string? ConstructorNameEncrypted { get; set; }
 
         public ICollection<Assignment>? Assignments { get; set; }
     }

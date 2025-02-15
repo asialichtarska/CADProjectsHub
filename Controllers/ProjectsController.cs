@@ -55,10 +55,10 @@ namespace CADProjectsHub.Controllers
             {
                 if (assignment.CADModel != null &&
                     !string.IsNullOrEmpty(assignment.CADModel.ConstructorName) &&
-                    !string.IsNullOrEmpty(assignment.CADModel.IVKey))
+                    !string.IsNullOrEmpty(assignment.CADModel.ConstructorInitializationVector))
                 {
-                    assignment.CADModel.ConstructorName = DataProtection.Decrypt(
-                        assignment.CADModel.ConstructorName, encryptionKey, assignment.CADModel.IVKey);
+                    assignment.CADModel.ConstructorNameEncrypted = DataProtection.Decrypt(
+                        assignment.CADModel.ConstructorName, encryptionKey, assignment.CADModel.ConstructorInitializationVector);
                 }
             }
 

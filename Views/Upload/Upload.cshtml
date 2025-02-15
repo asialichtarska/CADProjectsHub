@@ -1,0 +1,41 @@
+﻿@model CADProjectsHub.Models.UploadViewModel
+
+@{
+    ViewData["Title"] = "Upload File";
+}
+
+<h2>Upload a File</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<form asp-action="UploadFile" asp-controller="Upload" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label>Select a CAD Model:</label>
+        <select asp-for="SelectedCADModelID" class="form-control">
+            <option value="">-- Select a model --</option>
+            @foreach (var model in Model.CADModels)
+            {
+                <option value="model.ID">model.Name</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>or enter a new model name:</label>
+        <input type="text" name="NewCADModelName" class="form-control" placeholder="Enter new model name" />
+    </div>
+
+    <div class="form-group">
+        <label>Select File:</label>
+        <input type="file" asp-for="File" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Upload</button>
+</form>

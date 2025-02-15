@@ -50,6 +50,24 @@ namespace CADProjectsHub.Controllers
                 cADModels = cADModels.Where(s => s.Name.Contains(searchString)
                                        || s.FileType.Contains(searchString));
             }
+
+            var encryptionKey = _configuration["EncryptionSettings:AESKey"];
+
+            foreach (var cad in cADModels)
+            {
+                if (cad != null &&
+                    !string.IsNullOrEmpty(cad.ConstructorName) &&
+                    !string.IsNullOrEmpty(cad.ConstructorInitializationVector))
+                {
+                    cad.ConstructorNameEncrypted = DataProtection.Decrypt(
+                        cad.ConstructorName, encryptionKey, cad.ConstructorInitializationVector);
+                }
+                else
+                {
+                    cad.ConstructorNameEncrypted = cad.ConstructorName;
+                }
+            }
+
             switch (sortOrder)
             {
                 case "name_desc":
@@ -88,9 +106,9 @@ namespace CADProjectsHub.Controllers
             }
 
             var encryptionKey = _configuration["EncryptionSettings:AESKey"];
-            if (!string.IsNullOrEmpty(cADModel.ConstructorName) && !string.IsNullOrEmpty(cADModel.IVKey))
+            if (!string.IsNullOrEmpty(cADModel.ConstructorName) && !string.IsNullOrEmpty(cADModel.ConstructorInitializationVector))
             {
-                cADModel.ConstructorName = DataProtection.Decrypt(cADModel.ConstructorName, encryptionKey, cADModel.IVKey);
+                cADModel.ConstructorNameEncrypted = DataProtection.Decrypt(cADModel.ConstructorName, encryptionKey, cADModel.ConstructorInitializationVector);
             }
 
 
@@ -120,7 +138,7 @@ namespace CADProjectsHub.Controllers
                     {
                         string IV;
                         cADModel.ConstructorName = DataProtection.Encrypt(cADModel.ConstructorName, encryptionKey, out IV);
-                        cADModel.IVKey = IV;
+                        cADModel.ConstructorInitializationVector = IV;
                     }
 
                     _context.Add(cADModel);
@@ -174,7 +192,7 @@ namespace CADProjectsHub.Controllers
                     {
                         string IV;
                         cADModel.ConstructorName = DataProtection.Encrypt(cADModel.ConstructorName, encryptionKey, out IV);
-                        cADModel.IVKey = IV;
+                        cADModel.ConstructorInitializationVector = IV;
                     }
 
                     _context.Update(cADModel);

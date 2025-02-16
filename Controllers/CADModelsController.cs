@@ -83,8 +83,13 @@ namespace CADProjectsHub.Controllers
                     cADModels = cADModels.OrderBy(s => s.Name);
                     break;
             }
+
+            var models = _context.CADModels
+                         .Include(m => m.CADFiles) // Dodajemy Include, aby pobrać pliki!
+                         .AsNoTracking();
+
             int pageSize = 10;
-            return View(await PaginatedList<CADModel>.CreateAsync(cADModels.AsNoTracking(), pageNumber ?? 1, pageSize));
+            return View(await PaginatedList<CADModel>.CreateAsync(models, pageNumber ?? 1, pageSize));
         }
 
         // GET: CADModels/Details/5
@@ -98,6 +103,7 @@ namespace CADProjectsHub.Controllers
             var cADModel = await _context.CADModels
                 .Include(s => s.Assignments)
                     .ThenInclude(a => a.Project)
+                .Include(m => m.CADFiles)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (cADModel == null)

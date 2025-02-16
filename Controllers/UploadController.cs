@@ -26,7 +26,9 @@ namespace CADProjectsHub.Controllers
         {
             var model = new UploadViewModel
             {
-                CADModels = _context.CADModels.ToList()
+                CADModels = _context.CADModels
+                     .Include(m => m.CADFiles) // Pobranie powiązanych plików
+                     .ToList()
             };
 
             return View("Upload",model);
@@ -105,6 +107,28 @@ namespace CADProjectsHub.Controllers
 
             TempData["Success"] = "File uploaded successfully!";
             return RedirectToAction("Index");
+        }
+
+        /// Funkcja pobierania plików 
+        public IActionResult DownloadFile(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return NotFound();
+            }
+
+            var fullPath = Path.Combine(_environment.WebRootPath, filePath.TrimStart('/'));
+
+            if (!System.IO.File.Exists(fullPath))
+            {
+                return NotFound();
+            }
+
+            var fileBytes = System.IO.File.ReadAllBytes(fullPath);
+            var contentType = "application/octet-stream";
+            var fileName = Path.GetFileName(fullPath);
+
+            return File(fileBytes, contentType, fileName);
         }
     }
 }

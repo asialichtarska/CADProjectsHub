@@ -20,5 +20,6 @@ namespace CADProjectsHub.Models
         public string? ConstructorNameEncrypted { get; set; }
 
         public ICollection<Assignment>? Assignments { get; set; }
+        public ICollection<CADFile> CADFiles { get; set; } = new List<CADFile>();
     }
 }

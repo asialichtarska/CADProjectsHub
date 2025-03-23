@@ -59,7 +59,7 @@
                     {
                         <ul>
                             @foreach (var file in item.CADFiles)
-                            {
+                             {
                                 <li>
                                     <a asp-controller="FileDownload" asp-action="DownloadFile" asp-route-fileName="@file.FileName"
                                        class="btn btn-success btn-sm">
@@ -74,7 +74,6 @@
                         <span>Missing files</span>
                     }
                 </td>
-  
             </tr>
         }
     </tbody>

@@ -150,7 +150,7 @@ namespace CADProjectsHub.Migrations
             modelBuilder.Entity("CADProjectsHub.Models.CADFile", b =>
                 {
                     b.HasOne("CADProjectsHub.Models.CADModel", "CADModel")
-                        .WithMany()
+                        .WithMany("CADFiles")
                         .HasForeignKey("CADModelID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -161,6 +161,8 @@ namespace CADProjectsHub.Migrations
             modelBuilder.Entity("CADProjectsHub.Models.CADModel", b =>
                 {
                     b.Navigation("Assignments");
+
+                    b.Navigation("CADFiles");
                 });
 
             modelBuilder.Entity("CADProjectsHub.Models.Project", b =>

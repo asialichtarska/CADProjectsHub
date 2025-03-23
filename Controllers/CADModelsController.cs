@@ -85,7 +85,7 @@ namespace CADProjectsHub.Controllers
             }
 
             var models = _context.CADModels
-                         .Include(m => m.CADFiles) // Dodajemy Include, aby pobrać pliki!
+                         .Include(m => m.CADFiles) // Dodano Include, aby pobrać pliki!
                          .AsNoTracking();
 
             int pageSize = 10;

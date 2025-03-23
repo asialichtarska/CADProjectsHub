@@ -62,7 +62,7 @@ namespace CADProjectsHub.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-                ModelState.AddModelError(string.Empty, "Niepoprawny login lub hasło.");
+                ModelState.AddModelError(string.Empty, "Wrong login or password.");
             }
             return View(model);
         }

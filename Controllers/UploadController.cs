@@ -40,7 +40,7 @@ namespace CADProjectsHub.Controllers
             if (model.File == null || model.File.Length == 0)
             {
                 TempData["Error"] = "Please select a file.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "CADModels");
             }
 
             var allowedExtensions = new[] { ".step", ".stl", ".pdf" };
@@ -49,8 +49,10 @@ namespace CADProjectsHub.Controllers
             if (!allowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
             {
                 TempData["Error"] = "Invalid file type.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "CADModels");
             }
+
+
 
             // Znalezienie lub utworzenie modelu CAD
             CADModel selectedModel = null;
@@ -70,7 +72,8 @@ namespace CADProjectsHub.Controllers
                 {
                     Name = model.NewCADModelName,
                     FileType = extension,
-                    Manufacturing = "Unknown",
+                    Manufacturing = model.Manufacturing ?? "Unknown",
+                    ConstructorName = model.ConstructorName ?? "Unknown",
                     AssignmentDate = DateTime.UtcNow,
                 };
 
@@ -82,6 +85,7 @@ namespace CADProjectsHub.Controllers
                 TempData["Error"] = "Please select or enter a CAD model.";
                 return RedirectToAction("Index");
             }
+
 
             // Zapis pliku na serwerze
             var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
@@ -106,7 +110,7 @@ namespace CADProjectsHub.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "File uploaded successfully!";
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "CADModels");
         }
 
         /// Funkcja pobierania plików 

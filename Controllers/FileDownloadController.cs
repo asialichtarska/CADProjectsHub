@@ -19,14 +19,14 @@ namespace CADProjectsHub.Controllers
         {
             if (string.IsNullOrEmpty(fileName))
             {
-                return BadRequest("Nie podano nazwy pliku.");
+                return BadRequest("No name of file.");
             }
 
             var filePath = Path.Combine(_environment.WebRootPath, "uploads", fileName);
 
             if (!System.IO.File.Exists(filePath))
             {
-                return NotFound("Plik nie istnieje.");
+                return NotFound("File doesn't exist.");
             }
 
             var memory = new MemoryStream();

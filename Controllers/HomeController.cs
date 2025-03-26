@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CADProjectsHub.Models;
+using CADProjectsHub.Crypto;
 
 namespace CADProjectsHub.Controllers
 {
@@ -25,6 +26,12 @@ namespace CADProjectsHub.Controllers
         public IActionResult Privacy()
         {
             return View();
+        }
+
+        public IActionResult RunBenchmark()
+        {
+            Crypto.CryptoBenchmark.RunAllTests(); 
+            return Content("Benchmark completed. Check /wwwroot/logs/crypto_benchmark_log.txt");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

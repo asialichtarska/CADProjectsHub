@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "KSSkaofLFuvCjl3+8yjiG9+ZOVm7IK8VAZBW+aCOX3s=",
+  "Hash": "bF7jzPmCEBXKfORvuG2CPEpY4rfQY1koN8CgP5x2uRc=",
   "Source": "CADProjectsHub",
   "BasePath": "_content/CADProjectsHub",
   "Mode": "Default",
@@ -110,6 +110,44 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\js\\site.js"
+    },
+    {
+      "Identity": "D:\\App\\CADProjectsHub\\wwwroot\\keys\\privateKey.xml",
+      "SourceId": "CADProjectsHub",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\App\\CADProjectsHub\\wwwroot\\",
+      "BasePath": "_content/CADProjectsHub",
+      "RelativePath": "keys/privateKey.xml",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\keys\\privateKey.xml"
+    },
+    {
+      "Identity": "D:\\App\\CADProjectsHub\\wwwroot\\keys\\publicKey.xml",
+      "SourceId": "CADProjectsHub",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\App\\CADProjectsHub\\wwwroot\\",
+      "BasePath": "_content/CADProjectsHub",
+      "RelativePath": "keys/publicKey.xml",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\keys\\publicKey.xml"
     },
     {
       "Identity": "D:\\App\\CADProjectsHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
@@ -1195,12 +1233,12 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
     },
     {
-      "Identity": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Drill.STEP",
+      "Identity": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Back case.STEP.enc",
       "SourceId": "CADProjectsHub",
       "SourceType": "Discovered",
       "ContentRoot": "D:\\App\\CADProjectsHub\\wwwroot\\",
       "BasePath": "_content/CADProjectsHub",
-      "RelativePath": "uploads/Drill.STEP",
+      "RelativePath": "uploads/Back case.STEP.enc",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -1211,15 +1249,15 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\uploads\\Drill.STEP"
+      "OriginalItemSpec": "wwwroot\\uploads\\Back case.STEP.enc"
     },
     {
-      "Identity": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Machine shaft.pdf",
+      "Identity": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Back case.STEP.enc.sig",
       "SourceId": "CADProjectsHub",
       "SourceType": "Discovered",
       "ContentRoot": "D:\\App\\CADProjectsHub\\wwwroot\\",
       "BasePath": "_content/CADProjectsHub",
-      "RelativePath": "uploads/Machine shaft.pdf",
+      "RelativePath": "uploads/Back case.STEP.enc.sig",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -1230,7 +1268,7 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\uploads\\Machine shaft.pdf"
+      "OriginalItemSpec": "wwwroot\\uploads\\Back case.STEP.enc.sig"
     }
   ]
 }

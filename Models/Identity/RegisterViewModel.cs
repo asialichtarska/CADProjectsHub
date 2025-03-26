@@ -10,13 +10,13 @@ namespace CADProjectsHub.Models.Identity
 
         [Required]
         [DataType(DataType.Password)]
-        [MinLength(8, ErrorMessage = "Hasło musi mieć co najmniej 8 znaków.")]
-        [RegularExpression(@"^(?=.*[A-Z]).+$", ErrorMessage = "Hasło musi zawierać co najmniej jedną wielką literę.")]
+        [MinLength(8, ErrorMessage = "The password must have at least 8 characters.")]
+        [RegularExpression(@"^(?=.*[A-Z]).+$", ErrorMessage = "The password must contain at least one capital letter.")]
         public string Password { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "Hasła nie są zgodne.")]
+        [Compare("Password", ErrorMessage = "Passwords do not match.")]
         public string ConfirmPassword { get; set; }
     }
 }

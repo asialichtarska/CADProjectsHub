@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using CADProjectsHub.Data;
 using CADProjectsHub.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using CADProjectsHub.Helpers;
 
 namespace CADProjectsHub.Controllers
 {
@@ -34,6 +35,28 @@ namespace CADProjectsHub.Controllers
             return View("Upload",model);
         }
 
+        [HttpGet]
+        public IActionResult GenerateKeys()
+        {
+            var rsaHelper = new RSAHelper();
+            var (publicKey, privateKey) = ("", "");
+
+            using (var rsa = new System.Security.Cryptography.RSACryptoServiceProvider(2048))
+            {
+                publicKey = rsa.ToXmlString(false);
+                privateKey = rsa.ToXmlString(true);
+            }
+
+            // Zapis kluczy w odpowiednich lokalizacjach
+            var keysFolder = Path.Combine(_environment.WebRootPath, "keys");
+            Directory.CreateDirectory(Path.Combine(_environment.WebRootPath, "keys"));
+            System.IO.File.WriteAllText(Path.Combine(_environment.WebRootPath, "keys/publicKey.xml"), publicKey);
+            System.IO.File.WriteAllText(Path.Combine(_environment.WebRootPath, "keys/privateKey.xml"), privateKey);
+
+            TempData["Success"] = "RSA keys generated successfully!";
+            return RedirectToAction("Index");
+        }
+
         [HttpPost]
         public async Task<IActionResult> UploadFile(UploadViewModel model)
         {
@@ -51,8 +74,6 @@ namespace CADProjectsHub.Controllers
                 TempData["Error"] = "Invalid file type.";
                 return RedirectToAction("Index", "CADModels");
             }
-
-
 
             // Znalezienie lub utworzenie modelu CAD
             CADModel selectedModel = null;
@@ -86,53 +107,93 @@ namespace CADProjectsHub.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Szyfrowanie pliku przed zapisem
+            var rsaHelper = new RSAHelper();
+            var publicKey = System.IO.File.ReadAllText(Path.Combine(_environment.WebRootPath, "keys/publicKey.xml"));
+            var privateKey = System.IO.File.ReadAllText(Path.Combine(_environment.WebRootPath, "keys/privateKey.xml"));
 
-            // Zapis pliku na serwerze
+            using var memoryStream = new MemoryStream();
+            await model.File.CopyToAsync(memoryStream);
+            var fileData = memoryStream.ToArray();
+
+            // Szyfrowanie i podpisywanie
+            var encryptedData = rsaHelper.EncryptFile(fileData, publicKey);
+            var checksum = rsaHelper.GenerateChecksum(fileData);
+            var signature = rsaHelper.SignData(checksum, privateKey);
+
+            // Zapis zaszyfrowanego pliku na serwerze
             var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
             Directory.CreateDirectory(uploadsFolder);
-            var filePath = Path.Combine(uploadsFolder, model.File.FileName);
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await model.File.CopyToAsync(stream);
-            }
+            var encryptedFileName = model.File.FileName + ".enc";
+            var filePath = Path.Combine(uploadsFolder, encryptedFileName);
+
+            await System.IO.File.WriteAllBytesAsync(filePath, encryptedData);
+
+            var sigPath = filePath + ".sig";
+            await System.IO.File.WriteAllBytesAsync(sigPath, signature);
 
             // Dodanie pliku do bazy danych
             var newFile = new CADFile
             {
-                FileName = model.File.FileName,
+                FileName = encryptedFileName,
                 FileType = extension,
-                FilePath = $"/uploads/{model.File.FileName}",
-                CADModelID = selectedModel.ID // Powiązanie z modelem
+                FilePath = $"/uploads/{encryptedFileName}",
+                CADModelID = selectedModel.ID
             };
 
             _context.CADFiles.Add(newFile);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "File uploaded successfully!";
+            TempData["Success"] = "File encrypted and uploaded successfully!";
             return RedirectToAction("Index", "CADModels");
         }
 
-        /// Funkcja pobierania plików 
-        public IActionResult DownloadFile(string filePath)
+        // Metoda do deszyfrowania i pobierania pliku
+        [HttpGet]
+        public IActionResult DownloadFile(int id)
         {
-            if (string.IsNullOrEmpty(filePath))
+            var fileRecord = _context.CADFiles.Find(id);
+            if (fileRecord == null || string.IsNullOrEmpty(fileRecord.FilePath))
             {
                 return NotFound();
             }
 
-            var fullPath = Path.Combine(_environment.WebRootPath, filePath.TrimStart('/'));
+            var fullPath = Path.Combine(_environment.WebRootPath, fileRecord.FilePath.TrimStart('/'));
 
             if (!System.IO.File.Exists(fullPath))
             {
                 return NotFound();
             }
 
-            var fileBytes = System.IO.File.ReadAllBytes(fullPath);
-            var contentType = "application/octet-stream";
-            var fileName = Path.GetFileName(fullPath);
+            var sigPath = fullPath + ".sig";
+            if (!System.IO.File.Exists(sigPath))
+            {
+                TempData["Error"] = "Missing digital signature.";
+                return RedirectToAction("Index", "CADModels");
+            }
 
-            return File(fileBytes, contentType, fileName);
+            var rsaHelper = new RSAHelper();
+            var privateKey = System.IO.File.ReadAllText(Path.Combine(_environment.WebRootPath, "keys/privateKey.xml"));
+            var publicKey = System.IO.File.ReadAllText(Path.Combine(_environment.WebRootPath, "keys/publicKey.xml"));
+
+            // Odczyt i deszyfrowanie danych
+            var encryptedData = System.IO.File.ReadAllBytes(fullPath);
+            var signature = System.IO.File.ReadAllBytes(sigPath);
+
+            var decryptedData = rsaHelper.DecryptFile(encryptedData, privateKey);
+            var checksum = rsaHelper.GenerateChecksum(decryptedData);
+
+            if (!rsaHelper.VerifySignature(checksum, signature, publicKey))
+            {
+                TempData["Error"] = "Digital signature verification failed.";
+                return RedirectToAction("Index", "CADModels");
+            }
+
+            var contentType = "application/octet-stream";
+            var originalFileName = fileRecord.FileName.Replace(".enc", "");
+
+            return File(decryptedData, contentType, originalFileName);
         }
     }
 }

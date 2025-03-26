@@ -7,22 +7,33 @@
 <h2>Upload a File</h2>
 
 @if (TempData["Error"] != null)
+
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 @if (TempData["Success"] != null)
+
 {
     <div class="alert alert-success">@TempData["Success"]</div>
 }
+
+<div class="d-flex justify-content-between mb-3">
+    <a asp-action="GenerateKeys" class="btn btn-info">🔐 Generate RSA Keys</a>
+</div>
+
+<p class="text-muted">
+    Files will be <strong>encrypted using AES</strong> and <strong>digitally signed using RSA</strong>.
+    This ensures both confidentiality and authenticity.
+</p>
 
 <form asp-action="UploadFile" asp-controller="Upload" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label>Select a CAD Model:</label>
         <select asp-for="SelectedCADModelID" class="form-control">
             <option value="">-- Select a model --</option>
-            @foreach (var model in Model.CADModels)
+            @foreach (var item in Model.CADModels)
             {
-                <option value="model.ID">model.Name</option>
+                <option value="@item.ID">@item.Name</option>
             }
         </select>
     </div>

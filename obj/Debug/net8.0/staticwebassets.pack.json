@@ -17,6 +17,14 @@
       "PackagePath": "staticwebassets\\js\\site.js"
     },
     {
+      "Id": "D:\\App\\CADProjectsHub\\wwwroot\\keys\\privateKey.xml",
+      "PackagePath": "staticwebassets\\keys\\privateKey.xml"
+    },
+    {
+      "Id": "D:\\App\\CADProjectsHub\\wwwroot\\keys\\publicKey.xml",
+      "PackagePath": "staticwebassets\\keys\\publicKey.xml"
+    },
+    {
       "Id": "D:\\App\\CADProjectsHub\\wwwroot\\lib\\bootstrap\\LICENSE",
       "PackagePath": "staticwebassets\\lib\\bootstrap"
     },
@@ -245,12 +253,12 @@
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
     },
     {
-      "Id": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Drill.STEP",
-      "PackagePath": "staticwebassets\\uploads\\Drill.STEP"
+      "Id": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Back case.STEP.enc",
+      "PackagePath": "staticwebassets\\uploads\\Back case.STEP.enc"
     },
     {
-      "Id": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Machine shaft.pdf",
-      "PackagePath": "staticwebassets\\uploads\\Machine shaft.pdf"
+      "Id": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Back case.STEP.enc.sig",
+      "PackagePath": "staticwebassets\\uploads\\Back case.STEP.enc.sig"
     },
     {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.CADProjectsHub.Microsoft.AspNetCore.StaticWebAssets.props",

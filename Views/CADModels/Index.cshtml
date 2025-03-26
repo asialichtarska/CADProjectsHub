@@ -1,10 +1,10 @@
 ﻿@model PaginatedList<CADProjectsHub.Models.CADModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Models";
 }
 
-<h1>Index</h1>
+<h1>Models</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -61,7 +61,7 @@
                             @foreach (var file in item.CADFiles)
                              {
                                 <li>
-                                    <a asp-controller="FileDownload" asp-action="DownloadFile" asp-route-fileName="@file.FileName"
+                                    <a asp-controller="Upload" asp-action="DownloadFile" asp-route-id="@file.ID"
                                        class="btn btn-success btn-sm">
                                         Download @file.FileName
                                     </a>

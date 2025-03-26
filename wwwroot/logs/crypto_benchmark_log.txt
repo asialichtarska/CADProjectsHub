@@ -1,0 +1,8 @@
+===== Crypto Benchmark Results =====
+
+AES-128 | Encrypt: 1 ms | Decrypt: 1 ms
+AES-192 | Encrypt: 2 ms | Decrypt: 2 ms
+AES-256 | Encrypt: 1 ms | Decrypt: 1 ms
+RSA-1024 | Encrypt: 17 ms | Decrypt: 0 ms
+RSA-2048 | Encrypt: 241 ms | Decrypt: 0 ms
+RSA-4096 | Encrypt: 798 ms | Decrypt: 4 ms

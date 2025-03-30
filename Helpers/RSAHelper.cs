@@ -1,100 +1,186 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-
 
 namespace CADProjectsHub.Helpers
 {
     public class RSAHelper
     {
-        public void AssignNewKey(string publicKeyPath, string privateKeyPath)
-        {
-            using (var rsa = new RSACryptoServiceProvider(2048)) // Użycie RSA 2048-bit
-            {
-                rsa.PersistKeyInCsp = false;
+        private static readonly string LogPath = Path.Combine("wwwroot", "logs", "data_benchmark_log.txt");
 
-                File.WriteAllText(publicKeyPath, rsa.ToXmlString(false));
-                File.WriteAllText(privateKeyPath, rsa.ToXmlString(true));
-            }
+        public (string publicKey, string privateKey) GenerateKeys()
+        {
+            using var rsa = new RSACryptoServiceProvider(2048);
+            return (rsa.ToXmlString(false), rsa.ToXmlString(true));
         }
 
-        //Hybrydowe szyfrowanie dużego pliku (AES + RSA)
+        // =============================
+        // HYBRYDOWE SZYFROWANIE PLIKU
+        // =============================
         public byte[] EncryptFile(byte[] fileData, string publicKey)
         {
+            var stopwatch = Stopwatch.StartNew();
+
             using var aes = Aes.Create();
+            aes.KeySize = 256;
             aes.GenerateKey();
             aes.GenerateIV();
 
-            using var encryptor = aes.CreateEncryptor();
-            var encryptedFileData = encryptor.TransformFinalBlock(fileData, 0, fileData.Length);
+            byte[] encryptedFile;
+            using (var ms = new MemoryStream())
+            using (var cryptoStream = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
+            {
+                cryptoStream.Write(fileData, 0, fileData.Length);
+                cryptoStream.FlushFinalBlock();
+                encryptedFile = ms.ToArray();
+            }
 
             using var rsa = new RSACryptoServiceProvider(2048);
             rsa.PersistKeyInCsp = false;
             rsa.FromXmlString(publicKey);
-
             var encryptedKey = rsa.Encrypt(aes.Key, false);
             var encryptedIV = rsa.Encrypt(aes.IV, false);
 
-            using var ms = new MemoryStream();
-            ms.Write(encryptedKey, 0, encryptedKey.Length);      // 256B
-            ms.Write(encryptedIV, 0, encryptedIV.Length);        // 256B
-            ms.Write(encryptedFileData, 0, encryptedFileData.Length);
+            using var finalStream = new MemoryStream();
+            using (var bw = new BinaryWriter(finalStream))
+            {
+                bw.Write(encryptedKey.Length);
+                bw.Write(encryptedIV.Length);
+                bw.Write(encryptedKey);
+                bw.Write(encryptedIV);
+                bw.Write(encryptedFile);
+            }
 
-            return ms.ToArray();
+            stopwatch.Stop();
+            LogOperation("EncryptFile", fileData.Length, stopwatch.ElapsedMilliseconds);
+
+            return finalStream.ToArray();
         }
 
-        //Hybrydowe deszyfrowanie dużego pliku
+        // =============================
+        // HYBRYDOWE ODSZYFROWANIE PLIKU
+        // =============================
         public byte[] DecryptFile(byte[] encryptedData, string privateKey)
         {
+            var stopwatch = Stopwatch.StartNew();
+
             using var rsa = new RSACryptoServiceProvider(2048);
             rsa.PersistKeyInCsp = false;
             rsa.FromXmlString(privateKey);
 
-            byte[] encryptedKey = encryptedData.Take(256).ToArray();
-            byte[] encryptedIV = encryptedData.Skip(256).Take(256).ToArray();
-            byte[] encryptedFileData = encryptedData.Skip(512).ToArray();
+            using var ms = new MemoryStream(encryptedData);
+            using var br = new BinaryReader(ms);
 
-            byte[] aesKey = rsa.Decrypt(encryptedKey, false);
-            byte[] aesIV = rsa.Decrypt(encryptedIV, false);
+            int lenKey = br.ReadInt32();
+            int lenIV = br.ReadInt32();
+            var encryptedKey = br.ReadBytes(lenKey);
+            var encryptedIV = br.ReadBytes(lenIV);
+            var encryptedFile = br.ReadBytes((int)(ms.Length - ms.Position));
+
+            var aesKey = rsa.Decrypt(encryptedKey, false);
+            var aesIV = rsa.Decrypt(encryptedIV, false);
 
             using var aes = Aes.Create();
             aes.Key = aesKey;
             aes.IV = aesIV;
 
             using var decryptor = aes.CreateDecryptor();
-            return decryptor.TransformFinalBlock(encryptedFileData, 0, encryptedFileData.Length);
+            using var inputStream = new MemoryStream(encryptedFile);
+            using var cryptoStream = new CryptoStream(inputStream, decryptor, CryptoStreamMode.Read);
+            using var resultStream = new MemoryStream();
+            cryptoStream.CopyTo(resultStream);
+
+            stopwatch.Stop();
+            LogOperation("DecryptFile", encryptedData.Length, stopwatch.ElapsedMilliseconds);
+
+            return resultStream.ToArray();
         }
 
-        //Generowanie SHA-256 dla danych
-        public string GenerateChecksum(byte[] fileData)
+        // =============================
+        // SZYFROWANIE / DESZYFROWANIE STRING (AES)
+        // =============================
+        public string EncryptStringAES(string plainText, byte[] key, byte[] iv)
         {
-            using var sha256 = SHA256.Create();
-            var hash = sha256.ComputeHash(fileData);
-            return BitConverter.ToString(hash).Replace("-", "").ToLower();
+            var stopwatch = Stopwatch.StartNew();
+
+            using var aes = Aes.Create();
+            aes.Key = key;
+            aes.IV = iv;
+
+            using var encryptor = aes.CreateEncryptor();
+            using var ms = new MemoryStream();
+            using var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
+            using (var sw = new StreamWriter(cs))
+            {
+                sw.Write(plainText);
+            }
+
+            stopwatch.Stop();
+            LogOperation("EncryptStringAES", Encoding.UTF8.GetByteCount(plainText), stopwatch.ElapsedMilliseconds);
+
+            return Convert.ToBase64String(ms.ToArray());
         }
 
-        //Tworzenie podpisu cyfrowego sumy SHA256
-        public byte[] SignData(string checksum, string privateKey)
+        public string DecryptStringAES(string cipherTextBase64, byte[] key, byte[] iv)
         {
-            using var rsa = new RSACryptoServiceProvider(2048);
-            rsa.PersistKeyInCsp = false;
-            rsa.FromXmlString(privateKey);
+            var stopwatch = Stopwatch.StartNew();
 
-            var dataToSign = Encoding.UTF8.GetBytes(checksum);
-            return rsa.SignData(dataToSign, CryptoConfig.MapNameToOID("SHA256"));
+            var cipherBytes = Convert.FromBase64String(cipherTextBase64);
+            using var aes = Aes.Create();
+            aes.Key = key;
+            aes.IV = iv;
+
+            using var decryptor = aes.CreateDecryptor();
+            using var ms = new MemoryStream(cipherBytes);
+            using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
+            using var sr = new StreamReader(cs);
+            string decryptedText = sr.ReadToEnd();
+
+            stopwatch.Stop();
+            LogOperation("DecryptStringAES", cipherBytes.Length, stopwatch.ElapsedMilliseconds);
+
+            return decryptedText;
         }
 
-        //Weryfikacja podpisu SHA256
-        public bool VerifySignature(string checksum, byte[] signature, string publicKey)
+        private void LogOperation(string operation, int dataSizeBytes, long timeMs)
         {
-            using var rsa = new RSACryptoServiceProvider(2048);
-            rsa.PersistKeyInCsp = false;
-            rsa.FromXmlString(publicKey);
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(LogPath));
+                File.AppendAllText(LogPath,
+                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | {operation} | Size: {dataSizeBytes} B | Time: {timeMs} ms{Environment.NewLine}");
+            }
+            catch
+            {
+                // Ignoruj błędy logowania
+            }
+        }
 
-            var dataToVerify = Encoding.UTF8.GetBytes(checksum);
-            return rsa.VerifyData(dataToVerify, CryptoConfig.MapNameToOID("SHA256"), signature);
+        public static void RunAllTests()
+        {
+            var helper = new RSAHelper();
+
+            // Przykład: szyfrowanie pliku
+            var filePath = Path.Combine("wwwroot", "uploads", "Microscope clamp.STEP.enc");
+            var publicKeyPath = Path.Combine("wwwroot", "keys", "publicKey.xml");
+            var privateKeyPath = Path.Combine("wwwroot", "keys", "privateKey.xml");
+
+            if (!File.Exists(filePath) || !File.Exists(publicKeyPath) || !File.Exists(privateKeyPath))
+                return;
+
+            var encryptedFileData = File.ReadAllBytes(filePath);
+            var privateKey = File.ReadAllText(privateKeyPath);
+            var decryptedData = helper.DecryptFile(encryptedFileData, privateKey);
+
+            // Zasymuluj też szyfrowanie stringa
+            using var aes = Aes.Create();
+            aes.GenerateKey();
+            aes.GenerateIV();
+
+            var encryptedString = helper.EncryptStringAES("Test Constructor Name", aes.Key, aes.IV);
+            _ = helper.DecryptStringAES(encryptedString, aes.Key, aes.IV);
         }
     }
 }

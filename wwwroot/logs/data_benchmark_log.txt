@@ -1,0 +1,8 @@
+2025-03-30 16:44:31 | EncryptFile | Size: 234305 B | Time: 11 ms
+2025-03-30 16:45:23 | EncryptFile | Size: 87337 B | Time: 1 ms
+2025-03-30 17:00:39 | EncryptFile | Size: 65958 B | Time: 5 ms
+2025-03-30 17:01:20 | EncryptFile | Size: 313332 B | Time: 2 ms
+2025-03-30 17:02:27 | EncryptFile | Size: 267490 B | Time: 1 ms
+2025-03-30 17:02:44 | DecryptFile | Size: 66488 B | Time: 9 ms
+2025-03-30 17:02:46 | DecryptFile | Size: 313864 B | Time: 11 ms
+2025-03-30 17:02:53 | DecryptFile | Size: 268024 B | Time: 9 ms

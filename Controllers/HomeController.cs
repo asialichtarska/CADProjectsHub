@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CADProjectsHub.Models;
-using CADProjectsHub.Crypto;
+using CADProjectsHub.Helpers;
 
 namespace CADProjectsHub.Controllers
 {
@@ -30,7 +30,7 @@ namespace CADProjectsHub.Controllers
 
         public IActionResult RunBenchmark()
         {
-            Crypto.CryptoBenchmark.RunAllTests(); 
+            Helpers.RSAHelper.RunAllTests(); 
             return Content("Benchmark completed. Check /wwwroot/logs/crypto_benchmark_log.txt");
         }
 

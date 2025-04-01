@@ -9,6 +9,8 @@ using CADProjectsHub.Data;
 using CADProjectsHub.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using CADProjectsHub.Helpers;
+using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 
 namespace CADProjectsHub.Controllers
 {
@@ -16,11 +18,14 @@ namespace CADProjectsHub.Controllers
     {
         private readonly CADProjectsContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly IOptions<CryptoSettings> _cryptoSettings;
 
-        public UploadController(CADProjectsContext context, IWebHostEnvironment environment)
+
+        public UploadController(CADProjectsContext context, IWebHostEnvironment environment, IOptions<CryptoSettings> cryptoSettings)
         {
             _context = context;
             _environment = environment;
+            _cryptoSettings = cryptoSettings;
         }
 
         public IActionResult Index()
@@ -38,10 +43,10 @@ namespace CADProjectsHub.Controllers
         [HttpGet]
         public IActionResult GenerateKeys()
         {
-            var rsaHelper = new RSAHelper();
+            var rsaHelper = new RSAHelper(_cryptoSettings);
             var (publicKey, privateKey) = ("", "");
 
-            using (var rsa = new System.Security.Cryptography.RSACryptoServiceProvider(2048))
+            using(var rsa = new System.Security.Cryptography.RSACryptoServiceProvider(_cryptoSettings.Value.RSAKeySize))
             {
                 publicKey = rsa.ToXmlString(false);
                 privateKey = rsa.ToXmlString(true);
@@ -108,7 +113,7 @@ namespace CADProjectsHub.Controllers
             }
 
             // Szyfrowanie pliku przed zapisem
-            var rsaHelper = new RSAHelper();
+            var rsaHelper = new RSAHelper(_cryptoSettings);
             var publicKey = System.IO.File.ReadAllText(Path.Combine(_environment.WebRootPath, "keys/publicKey.xml"));
 
             using var memoryStream = new MemoryStream();
@@ -159,7 +164,7 @@ namespace CADProjectsHub.Controllers
                 return NotFound();
             }
 
-            var rsaHelper = new RSAHelper();
+            var rsaHelper = new RSAHelper(_cryptoSettings);
             var privateKey = System.IO.File.ReadAllText(Path.Combine(_environment.WebRootPath, "keys", "privateKey.xml"));
 
             // Odczyt i deszyfrowanie danych

@@ -281,6 +281,14 @@
       "PackagePath": "staticwebassets\\uploads\\Drill.STEP.enc.sig"
     },
     {
+      "Id": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Front case.STEP.enc",
+      "PackagePath": "staticwebassets\\uploads\\Front case.STEP.enc"
+    },
+    {
+      "Id": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Gearbox assembling.pdf.enc",
+      "PackagePath": "staticwebassets\\uploads\\Gearbox assembling.pdf.enc"
+    },
+    {
       "Id": "D:\\App\\CADProjectsHub\\wwwroot\\uploads\\Satellite gear wheel.STEP.enc",
       "PackagePath": "staticwebassets\\uploads\\Satellite gear wheel.STEP.enc"
     },

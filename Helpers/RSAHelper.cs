@@ -3,16 +3,23 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace CADProjectsHub.Helpers
 {
     public class RSAHelper
     {
+        private readonly CryptoSettings _cryptoSettings;
         private static readonly string LogPath = Path.Combine("wwwroot", "logs", "data_benchmark_log.txt");
+
+        public RSAHelper(IOptions<CryptoSettings> cryptoSettings)
+        {
+            _cryptoSettings = cryptoSettings.Value;
+        }
 
         public (string publicKey, string privateKey) GenerateKeys()
         {
-            using var rsa = new RSACryptoServiceProvider(2048);
+            using var rsa = new RSACryptoServiceProvider(_cryptoSettings.RSAKeySize);
             return (rsa.ToXmlString(false), rsa.ToXmlString(true));
         }
 
@@ -24,7 +31,7 @@ namespace CADProjectsHub.Helpers
             var stopwatch = Stopwatch.StartNew();
 
             using var aes = Aes.Create();
-            aes.KeySize = 256;
+            aes.KeySize = _cryptoSettings.AESKeySize;
             aes.GenerateKey();
             aes.GenerateIV();
 
@@ -37,7 +44,7 @@ namespace CADProjectsHub.Helpers
                 encryptedFile = ms.ToArray();
             }
 
-            using var rsa = new RSACryptoServiceProvider(2048);
+            using var rsa = new RSACryptoServiceProvider(_cryptoSettings.RSAKeySize);
             rsa.PersistKeyInCsp = false;
             rsa.FromXmlString(publicKey);
             var encryptedKey = rsa.Encrypt(aes.Key, false);
@@ -54,7 +61,7 @@ namespace CADProjectsHub.Helpers
             }
 
             stopwatch.Stop();
-            LogOperation("EncryptFile", fileData.Length, stopwatch.ElapsedMilliseconds);
+            LogOperation("EncryptFile", "RSA/AES", aes.KeySize, _cryptoSettings.RSAKeySize, "FileSize", fileData.Length, stopwatch.ElapsedMilliseconds);
 
             return finalStream.ToArray();
         }
@@ -66,7 +73,7 @@ namespace CADProjectsHub.Helpers
         {
             var stopwatch = Stopwatch.StartNew();
 
-            using var rsa = new RSACryptoServiceProvider(2048);
+            using var rsa = new RSACryptoServiceProvider(_cryptoSettings.RSAKeySize);
             rsa.PersistKeyInCsp = false;
             rsa.FromXmlString(privateKey);
 
@@ -93,7 +100,7 @@ namespace CADProjectsHub.Helpers
             cryptoStream.CopyTo(resultStream);
 
             stopwatch.Stop();
-            LogOperation("DecryptFile", encryptedData.Length, stopwatch.ElapsedMilliseconds);
+            LogOperation("DecryptFile", "RSA/AES", aes.KeySize, _cryptoSettings.RSAKeySize, "FileSize", encryptedData.Length, stopwatch.ElapsedMilliseconds);
 
             return resultStream.ToArray();
         }
@@ -118,7 +125,7 @@ namespace CADProjectsHub.Helpers
             }
 
             stopwatch.Stop();
-            LogOperation("EncryptStringAES", Encoding.UTF8.GetByteCount(plainText), stopwatch.ElapsedMilliseconds);
+            LogOperation("EncryptStringAES", "AES", key.Length * 8, null, "DataSize", Encoding.UTF8.GetByteCount(plainText), stopwatch.ElapsedMilliseconds);
 
             return Convert.ToBase64String(ms.ToArray());
         }
@@ -139,18 +146,23 @@ namespace CADProjectsHub.Helpers
             string decryptedText = sr.ReadToEnd();
 
             stopwatch.Stop();
-            LogOperation("DecryptStringAES", cipherBytes.Length, stopwatch.ElapsedMilliseconds);
+            LogOperation("DecryptStringAES", "AES", key.Length * 8, null, "DataSize", cipherBytes.Length, stopwatch.ElapsedMilliseconds);
 
             return decryptedText;
         }
 
-        private void LogOperation(string operation, int dataSizeBytes, long timeMs)
+        private void LogOperation(string operation, string algorithm, int aesKeyBits, int? rsaKeyBits, string sizeType, int dataSizeBytes, long timeMs)
         {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(LogPath));
+                var logDir = Path.GetDirectoryName(LogPath);
+                if (!string.IsNullOrEmpty(logDir))
+                {
+                    Directory.CreateDirectory(logDir);
+                }
+                var rsaInfo = rsaKeyBits.HasValue ? $" | RSAKey: {rsaKeyBits.Value}" : string.Empty;
                 File.AppendAllText(LogPath,
-                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | {operation} | Size: {dataSizeBytes} B | Time: {timeMs} ms{Environment.NewLine}");
+                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | {operation} | {algorithm} | AESKey: {aesKeyBits}{rsaInfo} | {sizeType}: {dataSizeBytes} B | Time: {timeMs} ms{Environment.NewLine}");
             }
             catch
             {
@@ -158,29 +170,28 @@ namespace CADProjectsHub.Helpers
             }
         }
 
-        public static void RunAllTests()
+        public void RunAllTests()
         {
-            var helper = new RSAHelper();
-
-            // Przykład: szyfrowanie pliku
+            // Szyfrowanie pliku testowego
             var filePath = Path.Combine("wwwroot", "uploads", "Microscope clamp.STEP.enc");
             var publicKeyPath = Path.Combine("wwwroot", "keys", "publicKey.xml");
             var privateKeyPath = Path.Combine("wwwroot", "keys", "privateKey.xml");
 
-            if (!File.Exists(filePath) || !File.Exists(publicKeyPath) || !File.Exists(privateKeyPath))
-                return;
+            if (File.Exists(filePath) && File.Exists(publicKeyPath) && File.Exists(privateKeyPath))
+            {
+                var encryptedFileData = File.ReadAllBytes(filePath);
+                var privateKey = File.ReadAllText(privateKeyPath);
+                _ = DecryptFile(encryptedFileData, privateKey);
+            }
 
-            var encryptedFileData = File.ReadAllBytes(filePath);
-            var privateKey = File.ReadAllText(privateKeyPath);
-            var decryptedData = helper.DecryptFile(encryptedFileData, privateKey);
-
-            // Zasymuluj też szyfrowanie stringa
+            // Szyfrowanie tekstu
             using var aes = Aes.Create();
             aes.GenerateKey();
             aes.GenerateIV();
 
-            var encryptedString = helper.EncryptStringAES("Test Constructor Name", aes.Key, aes.IV);
-            _ = helper.DecryptStringAES(encryptedString, aes.Key, aes.IV);
+            string constructorName = "John Doe";
+            var encryptedString = EncryptStringAES(constructorName, aes.Key, aes.IV);
+            _ = DecryptStringAES(encryptedString, aes.Key, aes.IV);
         }
     }
 }

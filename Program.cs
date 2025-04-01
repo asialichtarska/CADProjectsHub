@@ -1,4 +1,5 @@
 using CADProjectsHub.Data;
+using CADProjectsHub.Helpers;
 using CADProjectsHub.Models.Identity;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Wczytanie konfiguracji CryptoSettings z appsettings.json
+builder.Services.Configure<CryptoSettings>(
+    builder.Configuration.GetSection("CryptoSettings")
+);
 
 // Rejestracja bazy danych dla u¿ytkowników (IdentityDB)
 builder.Services.AddDbContext<IdentityContext>(options =>
@@ -35,6 +41,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
+
+builder.Services.Configure<CryptoSettings>(builder.Configuration.GetSection("CryptoSettings"));
 
 // Przesy³anie plików
 builder.Services.Configure<FormOptions>(options =>

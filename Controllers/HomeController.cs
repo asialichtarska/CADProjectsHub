@@ -6,16 +6,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CADProjectsHub.Models;
 using CADProjectsHub.Helpers;
+using Microsoft.Extensions.Options;
 
 namespace CADProjectsHub.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly IOptions<CryptoSettings> _cryptoSettings;
+        public HomeController(ILogger<HomeController> logger, IOptions<CryptoSettings> cryptoSettings)
         {
             _logger = logger;
+            _cryptoSettings = cryptoSettings;
         }
 
         public IActionResult Index()
@@ -30,7 +32,8 @@ namespace CADProjectsHub.Controllers
 
         public IActionResult RunBenchmark()
         {
-            Helpers.RSAHelper.RunAllTests(); 
+            var rsaHelper = new Helpers.RSAHelper(_cryptoSettings);
+            rsaHelper.RunAllTests();
             return Content("Benchmark completed. Check /wwwroot/logs/crypto_benchmark_log.txt");
         }
 

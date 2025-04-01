@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -7,12 +8,13 @@ namespace CADProjectsHub.Crypto
 {
     public static class DataProtection
     {
-        // Metoda do jednorazowego wygenerowania klucza AES i zapisania go w appsettings.json.
+        private static readonly string LogPath = Path.Combine("wwwroot", "logs", "data_benchmark_log.txt");
+
         public static string GenerateKey()
         {
             using (Aes aes = Aes.Create())
             {
-                aes.KeySize = 256;
+                aes.KeySize = 128;
                 aes.GenerateKey();
                 return Convert.ToBase64String(aes.Key);
             }
@@ -25,7 +27,7 @@ namespace CADProjectsHub.Crypto
                 IVKey = string.Empty;
                 return string.Empty;
             }
-
+            var stopwatch = Stopwatch.StartNew();
             try
             {
                 using (Aes aes = Aes.Create())
@@ -44,6 +46,9 @@ namespace CADProjectsHub.Crypto
                         {
                             sw.Write(ConstructorName);
                         }
+                        stopwatch.Stop();
+                        LogOperation("EncryptConstructor", "AES", aes.KeySize, "StringSize", Encoding.UTF8.GetByteCount(ConstructorName), stopwatch.ElapsedMilliseconds);
+
                         return Convert.ToBase64String(ms.ToArray());
                     }
                 }
@@ -62,6 +67,7 @@ namespace CADProjectsHub.Crypto
             {
                 return string.Empty;
             }
+            var stopwatch = Stopwatch.StartNew();
 
             try
             {
@@ -77,7 +83,12 @@ namespace CADProjectsHub.Crypto
                     using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
                     using (StreamReader sr = new StreamReader(cs))
                     {
-                        return sr.ReadToEnd();
+                        string decrypted = sr.ReadToEnd();
+
+                        stopwatch.Stop();
+                        LogOperation("DecryptConstructor", "AES", aes.KeySize, "StringSize", CipherText.Length, stopwatch.ElapsedMilliseconds);
+
+                        return decrypted;
                     }
                 }
             }
@@ -85,6 +96,25 @@ namespace CADProjectsHub.Crypto
             {
                 Console.WriteLine("Error: " + ex.Message);
                 return string.Empty;
+            }
+        }
+
+        private static void LogOperation(string operation, string algorithm, int aesKeyBits, string sizeType, int dataSizeBytes, long timeMs)
+        {
+            try
+            {
+                var logDir = Path.GetDirectoryName(LogPath);
+                if (!string.IsNullOrEmpty(logDir))
+                {
+                    Directory.CreateDirectory(logDir);
+                }
+
+                File.AppendAllText(LogPath,
+                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | {operation} | {algorithm} | AESKey: {aesKeyBits} | {sizeType}: {dataSizeBytes} B | Time: {timeMs} ms{Environment.NewLine}");
+            }
+            catch
+            {
+                // Ignoruj błędy logowania
             }
         }
     }

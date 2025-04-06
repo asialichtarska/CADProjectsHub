@@ -9,6 +9,8 @@ using CADProjectsHub.Data;
 using CADProjectsHub.Models;
 using CADProjectsHub.Crypto;
 using Microsoft.AspNetCore.Authorization;
+using CADProjectsHub.Helpers;
+using Microsoft.Extensions.Options;
 
 
 namespace CADProjectsHub.Controllers
@@ -18,7 +20,7 @@ namespace CADProjectsHub.Controllers
     {
         private readonly CADProjectsContext _context;
         private readonly IConfiguration _configuration;
-
+        private readonly IOptions<CryptoSettings> _cryptoSettings;
         public ProjectsController(CADProjectsContext context, IConfiguration configuration)
         {
             _context = context;
@@ -57,7 +59,8 @@ namespace CADProjectsHub.Controllers
                     !string.IsNullOrEmpty(assignment.CADModel.ConstructorName) &&
                     !string.IsNullOrEmpty(assignment.CADModel.ConstructorInitializationVector))
                 {
-                    assignment.CADModel.ConstructorNameEncrypted = DataProtection.Decrypt(
+                    var dataProtection = new DataProtection(_cryptoSettings);
+                    assignment.CADModel.ConstructorNameEncrypted = dataProtection.Decrypt(
                         assignment.CADModel.ConstructorName, encryptionKey, assignment.CADModel.ConstructorInitializationVector);
                 }
             }

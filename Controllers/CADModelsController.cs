@@ -10,6 +10,8 @@ using CADProjectsHub.Models;
 using CADProjectsHub;
 using CADProjectsHub.Crypto;
 using Microsoft.AspNetCore.Authorization;
+using CADProjectsHub.Helpers;
+using Microsoft.Extensions.Options;
 
 namespace CADProjectsHub.Controllers
 {
@@ -18,11 +20,12 @@ namespace CADProjectsHub.Controllers
     {
         private readonly CADProjectsContext _context;
         private readonly IConfiguration _configuration;
-
-        public CADModelsController(CADProjectsContext context, IConfiguration configuration)
+        private readonly IOptions<CryptoSettings> _cryptoSettings;
+        public CADModelsController(CADProjectsContext context, IConfiguration configuration, IOptions<CryptoSettings> cryptoSettings)
         {
             _context = context;
             _configuration = configuration;
+            _cryptoSettings = cryptoSettings;
         }
 
         // GET: CADModels
@@ -59,7 +62,8 @@ namespace CADProjectsHub.Controllers
                     !string.IsNullOrEmpty(cad.ConstructorName) &&
                     !string.IsNullOrEmpty(cad.ConstructorInitializationVector))
                 {
-                    cad.ConstructorNameEncrypted = DataProtection.Decrypt(
+                    var dataProtection = new DataProtection(_cryptoSettings);
+                    cad.ConstructorNameEncrypted = dataProtection.Decrypt(
                         cad.ConstructorName, encryptionKey, cad.ConstructorInitializationVector);
                 }
                 else
@@ -114,7 +118,8 @@ namespace CADProjectsHub.Controllers
             var encryptionKey = _configuration["EncryptionSettings:AESKey"];
             if (!string.IsNullOrEmpty(cADModel.ConstructorName) && !string.IsNullOrEmpty(cADModel.ConstructorInitializationVector))
             {
-                cADModel.ConstructorNameEncrypted = DataProtection.Decrypt(cADModel.ConstructorName, encryptionKey, cADModel.ConstructorInitializationVector);
+                var dataProtection = new DataProtection(_cryptoSettings);
+                cADModel.ConstructorNameEncrypted = dataProtection.Decrypt(cADModel.ConstructorName, encryptionKey, cADModel.ConstructorInitializationVector);
             }
 
 
@@ -143,7 +148,8 @@ namespace CADProjectsHub.Controllers
                     if (!string.IsNullOrEmpty(cADModel.ConstructorName)) 
                     {
                         string IV;
-                        cADModel.ConstructorName = DataProtection.Encrypt(cADModel.ConstructorName, encryptionKey, out IV);
+                        var dataProtection = new DataProtection(_cryptoSettings);
+                        cADModel.ConstructorName = dataProtection.Encrypt(cADModel.ConstructorName, encryptionKey, out IV);
                         cADModel.ConstructorInitializationVector = IV;
                     }
 
@@ -197,7 +203,8 @@ namespace CADProjectsHub.Controllers
                     if (!string.IsNullOrEmpty(cADModel.ConstructorName)) // Sprawdzenie, czy nie jest null
                     {
                         string IV;
-                        cADModel.ConstructorName = DataProtection.Encrypt(cADModel.ConstructorName, encryptionKey, out IV);
+                        var dataProtection = new DataProtection(_cryptoSettings);
+                        cADModel.ConstructorName = dataProtection.Encrypt(cADModel.ConstructorName, encryptionKey, out IV);
                         cADModel.ConstructorInitializationVector = IV;
                     }
 

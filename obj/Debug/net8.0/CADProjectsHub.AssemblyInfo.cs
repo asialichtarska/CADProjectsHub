@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CADProjectsHub")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aa74cc32a699af95ce5890b7bd5077de3ed88351")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a7ea55cbb6d14c674aa5323b873d3dddc32bbe1c")]
 [assembly: System.Reflection.AssemblyProductAttribute("CADProjectsHub")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CADProjectsHub")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

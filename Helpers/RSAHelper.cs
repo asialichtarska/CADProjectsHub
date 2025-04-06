@@ -61,7 +61,7 @@ namespace CADProjectsHub.Helpers
             }
 
             stopwatch.Stop();
-            LogOperation("EncryptFile", "RSA/AES", aes.KeySize, _cryptoSettings.RSAKeySize, "FileSize", fileData.Length, stopwatch.ElapsedMilliseconds);
+            LogOperation("EncryptFile", "RSA/AES", aes.KeySize, _cryptoSettings.RSAKeySize, "FileSize", fileData.Length, stopwatch.ElapsedTicks * 1_000_000 / Stopwatch.Frequency);
 
             return finalStream.ToArray();
         }
@@ -100,7 +100,7 @@ namespace CADProjectsHub.Helpers
             cryptoStream.CopyTo(resultStream);
 
             stopwatch.Stop();
-            LogOperation("DecryptFile", "RSA/AES", aes.KeySize, _cryptoSettings.RSAKeySize, "FileSize", encryptedData.Length, stopwatch.ElapsedMilliseconds);
+            LogOperation("DecryptFile", "RSA/AES", aes.KeySize, _cryptoSettings.RSAKeySize, "FileSize", encryptedData.Length, stopwatch.ElapsedTicks * 1_000_000 / Stopwatch.Frequency);
 
             return resultStream.ToArray();
         }
@@ -125,7 +125,7 @@ namespace CADProjectsHub.Helpers
             }
 
             stopwatch.Stop();
-            LogOperation("EncryptStringAES", "AES", key.Length * 8, null, "DataSize", Encoding.UTF8.GetByteCount(plainText), stopwatch.ElapsedMilliseconds);
+            LogOperation("EncryptStringAES", "AES", key.Length * 8, null, "DataSize", Encoding.UTF8.GetByteCount(plainText), stopwatch.ElapsedTicks * 1_000_000 / Stopwatch.Frequency);
 
             return Convert.ToBase64String(ms.ToArray());
         }
@@ -146,7 +146,7 @@ namespace CADProjectsHub.Helpers
             string decryptedText = sr.ReadToEnd();
 
             stopwatch.Stop();
-            LogOperation("DecryptStringAES", "AES", key.Length * 8, null, "DataSize", cipherBytes.Length, stopwatch.ElapsedMilliseconds);
+            LogOperation("DecryptStringAES", "AES", key.Length * 8, null, "DataSize", cipherBytes.Length, stopwatch.ElapsedTicks * 1_000_000 / Stopwatch.Frequency);
 
             return decryptedText;
         }
@@ -162,7 +162,7 @@ namespace CADProjectsHub.Helpers
                 }
                 var rsaInfo = rsaKeyBits.HasValue ? $" | RSAKey: {rsaKeyBits.Value}" : string.Empty;
                 File.AppendAllText(LogPath,
-                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | {operation} | {algorithm} | AESKey: {aesKeyBits}{rsaInfo} | {sizeType}: {dataSizeBytes} B | Time: {timeMs} ms{Environment.NewLine}");
+                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | {operation} | {algorithm} | AESKey: {aesKeyBits}{rsaInfo} | {sizeType}: {dataSizeBytes} B | Time: {timeMs} µs{Environment.NewLine}");
             }
             catch
             {
